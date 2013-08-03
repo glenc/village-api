@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node server.js"
   },
-  "engines": { 
+  "engines": {
     "node": "0.8.19"
   },
   "dependencies": {
@@ -14,5 +14,11 @@
     "restify": "~2.6.0",
     "bunyan": "~0.21.4",
     "mongoose": "~3.6.15"
+  },
+  "devDependencies": {
+    "chai": "~1.7.2",
+    "mocha": "~1.12.0",
+    "grunt": "~0.4.1",
+    "grunt-mocha-test": "~0.6.2"
   }
 }

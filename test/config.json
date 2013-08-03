@@ -1,0 +1,3 @@
+{
+  "dbconn": "mongodb://localhost/village-test"
+}
