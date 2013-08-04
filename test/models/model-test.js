@@ -13,8 +13,8 @@ var modelTests = [
       return {
         name: 'Test',
         contacts: [
-          { firstName: 'Glen', lastName: 'Cooper' },
-          { firstName: 'Shannon', lastName: 'Stevens' }
+          { firstName: 'Glen', lastName: 'Cooper', address: { street1: '123' }, phoneNumbers: [ { type:'Home', number: '123' } ] },
+          { firstName: 'Shannon', lastName: 'Stevens', address: { street1: '123' }, phoneNumbers: [ { type:'Home', number: '123' } ] }
         ]
       };
     },
@@ -35,7 +35,14 @@ var modelTests = [
     },
     create: function(data, done) {
       schema.FamilySchema.create({name:"Test"}, function(err, doc) {
-        data.family = doc._id;
+        if (Array.isArray(data)) {
+          data = data.map(function(d) {
+            d.family = doc._id;
+            return d;
+          });
+        } else {
+          data.family = doc._id;
+        }
         schema.StudentSchema.create(data, done);
       });
     },
@@ -196,6 +203,61 @@ modelTests.forEach(function(test) {
         test.model.get('000000000000000000000000', function(err, model) {
           expect(err).to.exist;
           expect(err).to.be.an.instanceof(models.errors.NotFoundError);
+          done();
+        });
+      });
+
+    });
+
+    describe('query', function() {
+      var randomVals = ['one', 'two', 'three', 'four', 'five'];
+      var prop = Object.keys(test.sampleData())[0];
+
+      beforeEach(function(done) {
+        init(function() {
+          var makeSample = function(val) {
+            var obj = test.sampleData();
+            obj[prop] = val;
+            return obj;
+          };
+          var models = randomVals.map(makeSample);
+          test.create(models, done);
+        });
+      });
+
+      afterEach(reset);
+
+      it ("returns all when no query provided", function(done) {
+        test.model.query({}, null, function(err, results) {
+          expect(err).not.to.exist;
+          expect(results).to.have.length(randomVals.length);
+          results.forEach(function(model) {
+            expect(randomVals).to.include(model[prop]);
+          });
+          done();
+        });
+      });
+
+      it ("returns matches when exact query provided", function(done) {
+        var query = {};
+        query[prop] = randomVals[0];
+        test.model.query(query, null, function(err, results) {
+          expect(err).not.to.exist;
+          expect(results).to.have.length(1);
+          expect(results[0][prop]).to.equal(randomVals[0]);
+          done();
+        });
+      });
+
+      it ("returns matches when query provided", function(done) {
+        var query = {};
+        query[prop] = /^f[a-z]*/;
+        test.model.query(query, null, function(err, results) {
+          expect(err).not.to.exist;
+          expect(results).to.have.length(2);
+          results.forEach(function(model) {
+            expect(['four', 'five']).to.include(model[prop]);
+          });
           done();
         });
       });
