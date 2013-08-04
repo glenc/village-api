@@ -262,6 +262,63 @@ modelTests.forEach(function(test) {
         });
       });
 
+      it ("returns all properties when no expand string is provided", function(done) {
+        var props = Object.keys(test.sampleData());
+        test.model.query({}, null, function(err, results) {
+          expect(err).not.to.exist;
+          var resultProps = Object.keys(results[0]);
+          expect(resultProps).to.have.length.of.at.least(props.length);
+          props.forEach(function(p) {
+            expect(resultProps).to.include(p);
+          });
+          done();
+        });
+      });
+
+      it ("returns only prop asked for when expand string is provided", function(done) {
+        test.model.query({}, prop, function(err, results) {
+          expect(err).not.to.exist;
+          var resultProps = Object.keys(results[0]);
+          var expectedProps = ['_id', prop];
+          expect(resultProps).to.have.length(expectedProps.length);
+          resultProps.forEach(function(p) {
+            expect(expectedProps).to.include(p);
+          });
+          done();
+        });
+      });
+
+      it ("returns multiple props when expand string contains multiple", function(done) {
+        var props = Object.keys(test.sampleData());
+        if (props.length == 1) { return done(); }
+
+        var expectedProps = [prop, props[1]];
+        var propString = expectedProps.join(' ');
+        test.model.query({}, propString, function(err, results) {
+          expect(err).not.to.exist;
+          expectedProps.push('_id');
+          var resultProps = Object.keys(results[0]);
+          expect(resultProps).to.have.length(expectedProps.length);
+          resultProps.forEach(function(p) {
+            expect(expectedProps).to.include(p);
+          });
+          done();
+        });
+      });
+
+      it ("returns props except excluded when expand string contains exclusion", function(done) {
+        test.model.query({}, "-"+prop, function(err, results) {
+          expect(err).not.to.exist;
+          var resultProps = Object.keys(results[0]);
+          var expectedProps = Object.keys(test.sampleData()).filter(function(k) { return k != prop; });
+          expect(resultProps).not.to.include(prop);
+          expectedProps.forEach(function(p) {
+            expect(resultProps).to.include(p);
+          });
+          done();
+        });
+      });
+
     });
 
   });
