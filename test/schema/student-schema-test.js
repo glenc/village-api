@@ -1,6 +1,6 @@
-expect        = require('chai').expect;
-helper        = require('../test-helper')();
-schema        = require('../../lib/schema');
+var expect = require('chai').expect;
+var helper = require('../test-helper')();
+var schema = require('../../lib/schema');
 
 describe('StudentSchema', function() {
   

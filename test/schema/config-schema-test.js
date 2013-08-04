@@ -1,10 +1,10 @@
-expect        = require('chai').expect;
-helper        = require('../test-helper')();
-ConfigSchema  = require('../../lib/schema').ConfigSchema;
+var expect = require('chai').expect;
+var helper = require('../test-helper')();
+var schema = require('../../lib/schema');
 
 describe('ConfigSchema', function() {
   var reset = function(done) {
-    helper.db.reset([ConfigSchema], done);
+    helper.db.reset([schema.ConfigSchema], done);
   };
 
   before(reset);
@@ -15,7 +15,7 @@ describe('ConfigSchema', function() {
 
     it('requires a key', function(done) {
       var setting = { value: 'foo' };
-      ConfigSchema.create(setting, function(err, doc) {
+      schema.ConfigSchema.create(setting, function(err, doc) {
         expect(err).to.exist;
         expect(err.name).to.equal('ValidationError');
         done();
@@ -24,9 +24,9 @@ describe('ConfigSchema', function() {
 
     it ('requires a unique key', function(done) {
       var setting = { key: 'foo' };
-      ConfigSchema.create(setting, function(err, doc) {
+      schema.ConfigSchema.create(setting, function(err, doc) {
         expect(err).to.not.exist;
-        ConfigSchema.create(setting, function(err, doc) {
+        schema.ConfigSchema.create(setting, function(err, doc) {
           expect(err).to.exist;
           expect(err.err).to.contain('duplicate key');
           done();
