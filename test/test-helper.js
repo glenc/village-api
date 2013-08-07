@@ -1,17 +1,10 @@
-var mongoose = require('mongoose');
-var config = require('./config.json');
+var mongoose  = require('mongoose');
+var bunyan    = require('bunyan');
+var api       = require('../lib/api');
+var config    = require('./config.json');
 
 module.exports = function(options) {
-  options = options || config;
-
-  if (mongoose.connection.readyState === 0) {
-    mongoose.connect(options.dbconn, function (err) {
-     if (err) {
-       throw err;
-     }
-   });
-  }
-
+  
   var resetDb = function(schemas, done) {
     var removed = 0;
 
