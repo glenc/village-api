@@ -14,6 +14,7 @@ module.exports = function(grunt) {
   
   grunt.registerTask('test', function() {
     var done = this.async();
+    process.env.NODE_ENV = 'test';
     require('./server.js');
     grunt.task.run('mochaTest');
     done();

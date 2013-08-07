@@ -38,7 +38,8 @@ var LOG = bunyan.createLogger({
 
   var server = api.createServer({
     log: LOG,
-    dbconn: dbconn[options.env]
+    dbconn: dbconn[options.env],
+    noAudit: true
   });
 
   server.listen(options.port, function onListening() {
