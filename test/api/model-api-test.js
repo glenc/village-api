@@ -190,22 +190,277 @@ modelTests.forEach(function(test) {
       });
     });
 
+    describe('GET?query', function() {
+      var randomVals = ['one', 'two', 'three', 'four', 'five'];
+      var prop = Object.keys(test.sampleData())[0];
+      
+      before(function(done) {
+        init(function() {
+          var makeSample = function(val) {
+            var obj = test.sampleData();
+            obj[prop] = val;
+            return obj;
+          };
+          var models = randomVals.map(makeSample);
+          test.create(models, done);
+        });
+      });
+
+      after(reset);
+      
+      it ("returns matches when exact query provided", function(done) {
+        var url = test.url + '?query=' + prop + ':' + randomVals[0];
+        client.get(url, function(err, req, res, data) {
+          expect(data).to.have.length(1);
+          expect(data[0][prop]).to.equal(randomVals[0]);
+          done();
+        });
+      });
+
+      it ("returns matches when query provided", function(done) {
+        var url = test.url + '?query=' + prop + ':' + '^f[a-z]*';
+        client.get(url, function(err, req, res, data) {
+          expect(data).to.have.length(2);
+          data.forEach(function(model) {
+            expect(['four', 'five']).to.include(model[prop]);
+          });
+          done();
+        });
+      });
+
+    });
+
     describe('POST', function() {
-      it('is alive');
+      var context = {};
+      before(function(done) {
+        init(function() {
+          var doCreate = function(model) {
+            client.post(test.url, model, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          };
+
+          if (test.beforeCreate) {
+            test.beforeCreate(test.sampleData(), doCreate);
+          } else {
+            doCreate(test.sampleData());
+          }
+        });
+      });
+
+      after(reset);
+
+      it('returns status code 201', function(done) {
+        expect(context.res.statusCode).to.equal(201);
+        done();
+      });
+
+      it('returns new object as response', function(done) {
+        expect(context.data).to.exist;
+        expect(context.data._id).to.exist;
+        var expectedObj = test.sampleData();
+        var prop = Object.keys(expectedObj)[0];
+        expect(context.data[prop]).to.equal(expectedObj[prop]);
+        done();
+      });
+
+      it('saves new model to database', function(done) {
+        test.schema.findById(context.data._id, function(err, doc) {
+          expect(doc).to.exist;
+          done();
+        });
+      });
     });
   });
 
   describe(test.url + '/:id', function() {
     describe('GET', function() {
-      it('is alive');
+
+      describe('with valid id', function() {
+
+        var context = {};
+        before(function(done) {
+          initWithOne(function(id) {
+            client.get(test.url + '/' + id, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 200', function() {
+          expect(context.res.statusCode).to.equal(200);
+        });
+
+        it('retrieves a model in body', function() {
+          expect(context.data).to.exist;
+        });
+
+      });
+
+      describe('with invalid id', function() {
+        var context = {};
+        before(function(done) {
+          init(function() {
+            var url = test.url + '/' + '000000000000000000000000';
+            client.get(url, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 404', function() {
+          expect(context.res.statusCode).to.equal(404);
+        });
+
+        it('returns an error object', function() {
+          expect(context.err).to.exist;
+          expect(context.err.restCode).to.equal('NotFound');
+        });
+
+      });
+
     });
 
     describe('PUT', function() {
-      it('is alive');
+      describe('with valid id', function() {
+
+        var context = {};
+        var prop = Object.keys(test.sampleData())[0];
+
+        before(function(done) {
+          initWithOne(function(id) {
+            var data = test.sampleData();
+            data[prop] = 'new_value';
+            client.put(test.url + '/' + id, data, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 200', function(done) {
+          expect(context.res.statusCode).to.equal(200);
+          done();
+        });
+
+        it('retrieves updated model in body', function(done) {
+          expect(context.data).to.exist;
+          expect(context.data[prop]).to.equal('new_value');
+          done();
+        });
+
+        it('updates record in the database', function(done) {
+          test.schema.findById(context.data._id, function(err, doc) {
+            expect(doc[prop]).to.equal('new_value');
+            done();
+          });
+        });
+
+      });
+
+      describe('with invalid id', function() {
+        var context = {};
+        before(function(done) {
+          init(function() {
+            var url = test.url + '/' + '000000000000000000000000';
+            client.put(url, test.sampleData(), function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 404', function() {
+          expect(context.res.statusCode).to.equal(404);
+        });
+
+        it('returns an error object', function() {
+          expect(context.err).to.exist;
+          expect(context.err.restCode).to.equal('NotFound');
+        });
+
+      });
     });
 
     describe('DELETE', function() {
-      it('is alive');
+      describe('with valid id', function() {
+
+        var context = {};
+        before(function(done) {
+          initWithOne(function(id) {
+            context.id = id;
+            client.del(test.url + '/' + id, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 200', function(done) {
+          expect(context.res.statusCode).to.equal(200);
+          done();
+        });
+
+        it('removes record in the database', function(done) {
+          test.schema.findById(context.id, function(err, doc) {
+            expect(doc).not.to.exist;
+            done();
+          });
+        });
+
+      });
+
+      describe('with invalid id', function() {
+        var context = {};
+        before(function(done) {
+          init(function() {
+            var url = test.url + '/' + '000000000000000000000000';
+            client.del(url, function(err, req, res, data) {
+              context.err = err;
+              context.res = res;
+              context.data = data;
+              done();
+            });
+          });
+        });
+
+        after(reset);
+
+        it('returns status code 404', function() {
+          expect(context.res.statusCode).to.equal(404);
+        });
+
+        it('returns an error object', function() {
+          expect(context.err).to.exist;
+          expect(context.err.restCode).to.equal('NotFound');
+        });
+
+      });
     });
   });
 });
