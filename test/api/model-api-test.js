@@ -218,7 +218,7 @@ modelTests.forEach(function(test) {
       });
 
       it ("returns matches when query provided", function(done) {
-        var url = test.url + '?query=' + prop + ':' + '^f[a-z]*';
+        var url = test.url + '?query=' + prop + ':' + 'f*';
         client.get(url, function(err, req, res, data) {
           expect(data).to.have.length(2);
           data.forEach(function(model) {
