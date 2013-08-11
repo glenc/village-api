@@ -28,7 +28,8 @@ describe('StudentSchema', function() {
         firstName: "Glen",
         lastName: "Cooper",
         family: setup.id,
-        graduatingClass: "2014"
+        graduatingClass: "2014",
+        gender: "M"
       };
     };
 
@@ -44,9 +45,19 @@ describe('StudentSchema', function() {
       });
     };
 
-    var requiredProps = ['firstName', 'lastName', 'family', 'graduatingClass'];
+    var requiredProps = ['firstName', 'lastName', 'family', 'graduatingClass', 'gender'];
     requiredProps.forEach(function(prop) {
       testRequiredProperty(prop);
+    });
+
+    it('requires gender to be either M or F', function(done) {
+      s = validStudent();
+      s.gender = "U";
+      schema.StudentSchema.create(s, function(err, doc) {
+        expect(err).to.exist;
+        expect(err.name).to.equal("ValidationError");
+        done();
+      });
     });
 
   });

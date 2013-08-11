@@ -29,10 +29,12 @@ function genContact(defaults) {
 
 function genStudent(lastName) {
   var classes = ["2013", "2014", "2015", "2016", "2017", "2018"];
+  var genders = ['M', 'F'];
   return {
     firstName: charlatan.Name.firstName(),
     lastName: lastName,
-    graduatingClass: classes[Math.floor(Math.random() * classes.length)]
+    graduatingClass: classes[Math.floor(Math.random() * classes.length)],
+    gender: genders[Math.floor(Math.random() * genders.length)]
   };
 }
 
