@@ -19,6 +19,9 @@ var modelTests = [
     },
     create: function(data, done) {
       schema.FamilySchema.create(data, done);
+    },
+    init: function(done) {
+      schema.ConfigSchema.create(configCalendar, done);
     }
   },
   {
@@ -49,6 +52,22 @@ var modelTests = [
         model.family = doc._id;
         done(model);
       });
+    },
+    init: function(done) {
+      schema.ConfigSchema.create(configCalendar, done);
+    }
+  },
+  {
+    url: '/config',
+    schema: schema.ConfigSchema,
+    sampleData: function() {
+      return {
+        key: 'Test',
+        value: { setting: 'value', setting2: 'value2' }
+      };
+    },
+    create: function(data, done) {
+      schema.ConfigSchema.create(data, done);
     }
   }
 ];
@@ -64,9 +83,8 @@ modelTests.forEach(function(test) {
   };
 
   var init = function(done) {
-    reset(function() {
-      schema.ConfigSchema.create(configCalendar, done);
-    });
+    var fn = test.init || function(done) { done(); };
+    reset(function() { fn(done); });
   };
 
   var initWithOne = function(done) {
