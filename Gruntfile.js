@@ -2,6 +2,7 @@ var gendata = require('./tools/data-generator');
 
 module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
+  grunt.loadNpmTasks('grunt-nodemon');
   
   grunt.initConfig({
     mochaTest: {
