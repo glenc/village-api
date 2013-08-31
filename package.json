@@ -13,7 +13,8 @@
     "underscore": "~1.5.1",
     "restify": "~2.6.0",
     "bunyan": "~0.21.4",
-    "mongoose": "~3.6.15"
+    "mongoose": "~3.6.15",
+    "moment": "~2.1.0"
   },
   "devDependencies": {
     "chai": "~1.7.2",

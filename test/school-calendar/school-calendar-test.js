@@ -1,4 +1,5 @@
 var expect          = require('chai').expect;
+var moment          = require('moment');
 var helper          = require('../test-helper')();
 var SchoolCalendar  = require('../../lib/school-calendar');
 
@@ -20,14 +21,12 @@ describe('SchoolCalendar', function() {
   it("gets a school year by name", function() {
     var y = cal.getYear("current");
     expect(y).to.exist;
-    expect(y.startDate.toString()).to.equal(new Date(config.years.current.startDate).toString());
-    expect(y.endDate.toString()).to.equal(new Date(config.years.current.endDate).toString());
   });
 
-  it("converts text date to real date on school years", function() {
+  it("converts text date to moment with beginning and end of day times", function() {
     var y = cal.getYear('current');
-    expect(y.startDate).to.be.a('Date');
-    expect(y.endDate).to.be.a('Date');
+    expect(y.startDate).to.eql(moment(config.years.current.startDate));
+    expect(y.endDate).to.eql(moment(config.years.current.endDate).endOf('day'));
   });
 
   it("calculates the current school year", function() {
